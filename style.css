@@ -1,15 +1,42 @@
 /* Table */
 table {
     border-collapse: collapse;
-    width: 100%;
-  }
-  
-  th, td {
+    width: 80%;
+    margin: auto;
+    border-style: solid;
+}
+
+#title {
+    text-align: center;
+}
+
+th,
+td {
     text-align: center;
     padding: 8px;
-  }
-  
-  tr:nth-child(even) {background-color: #f2f2f2;}
+}
+
+th {
+    min-width: 60px;
+    cursor: pointer;
+}
+
+#population {
+    min-width: 100px;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.btn {
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: rgb(128, 127, 127);
+}
 
 .center {
     text-align: center;
