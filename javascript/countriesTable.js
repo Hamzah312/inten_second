@@ -1,20 +1,18 @@
 import { handleTHClick } from "./events.js";
-import { handleSearch } from "./events.js";
-const originalData = [];
-const filteredData = [];
-export default function fetchData() {
+const filteredCountriesList = [];
+async function fetchData() {
   const apiUrl = 'https://restcountries.com/v3.1/all';
-  fetch(apiUrl)
-    .then(response => {
-      if (!response) {
-        throw new Error("something wrong")
-      }
-      return response.json()
-    })
-    .then(data => {
-      filterData(data);
-    })
-    .catch(error => console.error('Error fetching data:', error));
+
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error("Something went wrong");
+    }
+    const data = await response.json();
+    filterData(data);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
 }
 function filterData(fetchedData) {
   fetchedData.forEach(item => {
@@ -24,18 +22,17 @@ function filterData(fetchedData) {
     wantedItem.capital = item.capital ? item.capital[0] : "";
     wantedItem.population = Number.parseInt(item.population);
     wantedItem.region = item.region;
-    filteredData.push(wantedItem);
-    originalData.push(wantedItem);
+    filteredCountriesList.push(wantedItem);
   });
-  renderData(filteredData)
+  renderData(filteredCountriesList)
 }
-export function renderData(filteredData) {
+function renderData(filteredCountriesList) {
   const tableBody = document.querySelector('#data-table tbody');
   let i = 0;
   tableBody.innerHTML = "";
-  filteredData.forEach(item => {
+  filteredCountriesList.forEach(item => {
     const row = document.createElement('tr');
-    const btn = "<button>Show Borders</button>";
+    const btn = '<button class="btn">Show Borders</button>';
     row.innerHTML = `
             <input type="checkbox">
             <td>${item.name}</td>
@@ -68,12 +65,13 @@ export function searchData(filteredData, subString) {
 
 
 // reset
-window.addEventListener('load', function () {
+function runListeners() {
   const ths = document.getElementsByClassName('table_header');
   const search = document.getElementById('search');
-
   for (let th of ths) {
-    th.addEventListener('click', function () { handleTHClick(this.id, searchData(filteredData, search.value.toLocaleLowerCase())) });
+    th.addEventListener('click', function () { handleTHClick(this.id, searchData(filteredCountriesList, search.value.toLocaleLowerCase())) });
   }
-  search.addEventListener('input', function () { handleSearch(filteredData, search) });
-});
+  search.addEventListener('input', function () { handleSearch(filteredCountriesList, search) });
+}
+export { fetchData, renderData, runListeners };
+
