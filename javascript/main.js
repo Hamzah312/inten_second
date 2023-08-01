@@ -1,5 +1,5 @@
-import { fetchData, runListeners } from "./countriesTable.js";
-window.addEventListener('load', function () {
-    fetchData();
+import { fetchCountriesList, runListeners,renderCountriesList } from "./countriesTable.js";
+window.addEventListener('load',  ()=> {
+    fetchCountriesList();
     runListeners();
 });
