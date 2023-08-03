@@ -1,5 +1,4 @@
-
-import { renderCountriesList } from "./countriesTable.js";
+import { renderData, searchData, setRecordsPerPage } from "./countriesTable.js";
 let tableHeaderCounter = 0;
 let cachedTableHeaderName;
 const TableHeaders = document.getElementsByClassName("table_header");
@@ -46,5 +45,11 @@ export function handleSearch(filteredCountriesList, search) {
     setTimeout(function () {
         displayArrow(prop, "");
         renderData(searchData(filteredCountriesList, search.value.toLowerCase()));
-    }, 1000);}
+    }, 1000);
+}
+//pagination
+export function handleRecordsNum(recordsPerPage,filteredCountriesList){
+    displayArrow(prop, "");
+    renderData(setRecordsPerPage(Number.parseInt(recordsPerPage.value),filteredCountriesList));
+}
 

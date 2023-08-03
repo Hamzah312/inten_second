@@ -15,6 +15,7 @@ td {
     text-align: center;
     padding: 8px;
 }
+
 th {
     min-width: 60px;
     cursor: pointer;
@@ -36,8 +37,21 @@ tr:nth-child(even) {
 .btn:hover {
     background-color: rgb(128, 127, 127);
 }
+
+.footer{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
 .center {
     text-align: center;
+}
+
+.search_bar{
+    display: flex;
+    justify-content: center;
+    margin: 8px;
 }
 
 .pagination {

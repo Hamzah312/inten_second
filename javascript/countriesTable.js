@@ -1,5 +1,8 @@
-import { handleTHClick } from "./events.js";
-let filteredCountriesList ;
+
+import { handleTHClick, handleSearch, handleRecordsNum } from "./events.js";
+let filteredCountriesList;
+let recordPerPage = 10;
+let pageNumber = 1;
 async function fetchCountriesList() {
   const apiUrl = 'https://restcountries.com/v3.1/all';
 
@@ -43,31 +46,37 @@ function renderCountriesList(filteredCountriesList) {
   }
 }
 //sort
-export function searchData(filteredData, subString) {
-  console.log(filteredData);
-  const arr = filteredData.filter((item) => {
+function searchData(filteredCountriesList, subString) {
+  const arr = filteredCountriesList.filter((item) => {
     return item.name.toLowerCase().includes(subString) || item.cca3.toLowerCase().includes(subString) ||
       item.capital.toLowerCase().includes(subString)
       || String(item.population).includes(subString) || item.region.toLowerCase().includes(subString)
   });
-  console.log(arr);
   return arr;
 }
 //pagination
+function setRecordsPerPage(recordsPerPageValue, filteredCountriesList) {
+  return paginateData(filteredCountriesList, 2, recordsPerPageValue);
+}
 
-
-
-
-
-
-// reset
+function paginateData(filteredCountriesList, pageNumber, recordPerPage) {
+  const startIndex = (pageNumber - 1) * recordPerPage;
+  return filteredCountriesList.slice(startIndex, startIndex + recordPerPage);
+}
 function runListeners() {
   const ths = document.getElementsByClassName('table_header');
   const search = document.getElementById('search');
+  const recordsPerPage = document.getElementById("nums");
+  const pageNumbers=document.getElementsByClassName("page_numbers_arrow");
   for (let th of ths) {
-    th.addEventListener('click', () => { handleTHClick(th.id, filteredCountriesList) });
+    th.addEventListener('click', function () { handleTHClick(this.id, setRecordsPerPage(Number.parseInt
+      (recordsPerPage.value), searchData(filteredCountriesList, search.value.toLocaleLowerCase()))) });
   }
   search.addEventListener('input', function () { handleSearch(filteredCountriesList, search) });
+  recordsPerPage.addEventListener('change', function ()
+   { handleRecordsNum(recordsPerPage, searchData(filteredCountriesList, search.value.toLocaleLowerCase())) });
+  
 }
-export { fetchCountriesList, renderCountriesList, runListeners };
+export { fetchCountriesList, renderCountriesList, runListeners, searchData, setRecordsPerPage, paginateData };
+
 

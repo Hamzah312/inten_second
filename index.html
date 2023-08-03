@@ -12,8 +12,10 @@
 
 <body>
     <h1 id="title">Countries list Table</h1>
-    <label for="search">Filter</label>
-    <input type="text" id="search" name="search">
+    <div class="search_bar">
+        <label for="search">Filter</label>
+        <input type="text" id="search" name="search">
+    </div>
     <table id="data-table">
         <thead>
             <tr>
@@ -30,14 +32,24 @@
 
         </tbody>
     </table>
-    <div class="pagination">
-        <a>&laquo;</a>
-        <a>1</a>
-        <a>2</a>
-        <a>3</a>
-        <a>4</a>
-        <a>5</a>
-        <a>&raquo;</a>
+    <div class="footer">
+        <div class="pagination">
+            <a class="page_numbers_arrow">&laquo;</a>
+            <a class="page_numbers">1</a>
+            <a class="page_numbers">2</a>
+            <a class="page_numbers">3</a>
+            <a class="page_numbers">4</a>
+            <a class="page_numbers">5</a>
+            <a class="page_numbers_arrow">&raquo;</a>
+        </div>
+        <div>
+            <label for="nums">Choose num of records per page:</label>
+            <select name="nums" id="nums">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
     </div>
 </body>
 
