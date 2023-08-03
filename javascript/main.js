@@ -1,5 +1,5 @@
-import { fetchCountriesList, runListeners,renderCountriesList } from "./countriesTable.js";
-window.addEventListener('load',  ()=> {
-    fetchCountriesList();
+import { fetchCountriesList, runListeners } from "./countriesTable.js";
+window.addEventListener('load',  async ()=> {
+    await fetchCountriesList();
     runListeners();
 });

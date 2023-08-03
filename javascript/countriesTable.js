@@ -1,5 +1,5 @@
 
-import { handleTHClick, handleSearch, handleRecordsNum } from "./events.js";
+import { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, getPageNumber } from "./events.js";
 let filteredCountriesList;
 let recordPerPage = 10;
 let pageNumber = 1;
@@ -55,28 +55,33 @@ function searchData(filteredCountriesList, subString) {
   return arr;
 }
 //pagination
-function setRecordsPerPage(recordsPerPageValue, filteredCountriesList) {
-  return paginateData(filteredCountriesList, 2, recordsPerPageValue);
-}
-
 function paginateData(filteredCountriesList, pageNumber, recordPerPage) {
   const startIndex = (pageNumber - 1) * recordPerPage;
   return filteredCountriesList.slice(startIndex, startIndex + recordPerPage);
 }
 function runListeners() {
-  const ths = document.getElementsByClassName('table_header');
-  const search = document.getElementById('search');
-  const recordsPerPage = document.getElementById("nums");
-  const pageNumbers=document.getElementsByClassName("page_numbers_arrow");
-  for (let th of ths) {
-    th.addEventListener('click', function () { handleTHClick(this.id, setRecordsPerPage(Number.parseInt
-      (recordsPerPage.value), searchData(filteredCountriesList, search.value.toLocaleLowerCase()))) });
+  const TableHeadersElements = document.getElementsByClassName('table_header');
+  for (let tableHeader of TableHeadersElements) {
+    tableHeader.addEventListener('click', () => {
+      handleTHClick(tableHeader.id,
+        paginateData(searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()),
+          getPageNumber(), Number.parseInt(recordsPerPageElement.value)))
+    });
   }
-  search.addEventListener('input', function () { handleSearch(filteredCountriesList, search) });
-  recordsPerPage.addEventListener('change', function ()
-   { handleRecordsNum(recordsPerPage, searchData(filteredCountriesList, search.value.toLocaleLowerCase())) });
-  
+  const searchElement = document.getElementById('search');
+  searchElement.addEventListener('input', () => { handleSearch(filteredCountriesList, searchElement, recordsPerPageElement.value) });
+  const recordsPerPageElement = document.getElementById("nums");
+  recordsPerPageElement.addEventListener('change', () => {
+    handleRecordsNum(recordsPerPageElement,
+      searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()))
+  });
+  const pageArrowsElements = document.getElementsByClassName("page_numbers_arrow");
+  const pageNumbersElements = document.getElementsByClassName("page_numbers");
+  for (const pageArrowElement of pageArrowsElements) {
+    pageArrowElement.addEventListener('click', () => {
+      handleArrowsClick(searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()),pageArrowElement.id,pageNumbersElements,recordsPerPageElement.value);
+    });
+  }
+  handleRecordsNum(recordsPerPageElement, filteredCountriesList);
 }
-export { fetchCountriesList, renderCountriesList, runListeners, searchData, setRecordsPerPage, paginateData };
-
-
+export { fetchCountriesList, renderCountriesList, runListeners, searchData, paginateData };
