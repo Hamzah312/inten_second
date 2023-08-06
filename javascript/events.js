@@ -87,10 +87,6 @@ export function handleArrowsClick(filteredCountriesList, arrowDirection, pageNum
             }
             break;
     }
-    console.log("pointer:" + pageNumberPointer);
-    console.log("pointer last:" + pageNumberLastValuePointer);
-    console.log("pointer first:" + pageNumberFirstValuePointer);
-    console.log("pointer value:" + pageNumberValuePointer);
     renderCountriesList(paginateData(filteredCountriesList, pageNumberValuePointer, Number.parseInt(recordPerPage)));
 }
 

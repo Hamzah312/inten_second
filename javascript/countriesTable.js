@@ -79,7 +79,7 @@ function runListeners() {
   const pageNumbersElements = document.getElementsByClassName("page_numbers");
   for (const pageArrowElement of pageArrowsElements) {
     pageArrowElement.addEventListener('click', () => {
-      handleArrowsClick(searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()),pageArrowElement.id,pageNumbersElements,recordsPerPageElement.value);
+      handleArrowsClick(searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()), pageArrowElement.id, pageNumbersElements, recordsPerPageElement.value);
     });
   }
   handleRecordsNum(recordsPerPageElement, filteredCountriesList);
