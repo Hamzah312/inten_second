@@ -1,8 +1,9 @@
 
-import { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, getPageNumber } from "./events.js";
+import { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick } from "./events.js";
 let filteredCountriesList;
+let updatedCountriesList;
 let recordPerPage = 10;
-let pageNumber = 1;
+let searchedString = "";
 async function fetchCountriesList() {
   const apiUrl = 'https://restcountries.com/v3.1/all';
 
@@ -24,13 +25,14 @@ function filterCountriesList(fetchedData) {
     capital: item.capital ? item.capital[0] : "",
     population: Number.parseInt(item.population),
     region: item.region
-  }))
+  }));
+  updatedCountriesList = [...filteredCountriesList];
   return filteredCountriesList;
 }
-function renderCountriesList(filteredCountriesList) {
+function renderCountriesList(updatedCountriesList) {
   const tableBody = document.querySelector('#data-table tbody');
   tableBody.innerHTML = "";
-  for (const item of filteredCountriesList) {
+  for (const item of updatedCountriesList) {
     const row = document.createElement('tr');
     const btn = '<button class="btn">Show Borders</button>';
     row.innerHTML = `
@@ -45,43 +47,58 @@ function renderCountriesList(filteredCountriesList) {
     tableBody.appendChild(row);
   }
 }
-//sort
-function searchData(filteredCountriesList, subString) {
-  const arr = filteredCountriesList.filter((item) => {
-    return item.name.toLowerCase().includes(subString) || item.cca3.toLowerCase().includes(subString) ||
-      item.capital.toLowerCase().includes(subString)
-      || String(item.population).includes(subString) || item.region.toLowerCase().includes(subString)
-  });
-  return arr;
+// Sort
+function sortCountriesList(tableHeaderName, sortingOrder) {// sortingOrder=1: ASC / -1:DES
+  updatedCountriesList.sort((a, b) => a[tableHeaderName] > b[tableHeaderName] ? sortingOrder * 1 : sortingOrder * -1);
+  paginateCountriesList(1);
 }
-//pagination
-function paginateData(filteredCountriesList, pageNumber, recordPerPage) {
+
+// Searching
+function searchCountriesList() {
+  updatedCountriesList = filteredCountriesList.filter((item) => Object.values(item).some(innerItem =>
+    String(innerItem).toLocaleLowerCase().includes(searchedString)));
+}
+
+// Pagination
+function paginateCountriesList(pageNumber) {
   const startIndex = (pageNumber - 1) * recordPerPage;
-  return filteredCountriesList.slice(startIndex, startIndex + recordPerPage);
+  renderCountriesList(updatedCountriesList.slice(startIndex, startIndex + recordPerPage));
+}
+
+// Reset
+function reset() {
+  searchCountriesList(searchedString);
+  handleRecordsNum();
 }
 function runListeners() {
+  // Click listeners for all table headers
   const TableHeadersElements = document.getElementsByClassName('table_header');
   for (let tableHeader of TableHeadersElements) {
-    tableHeader.addEventListener('click', () => {
-      handleTHClick(tableHeader.id,
-        paginateData(searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()),
-          getPageNumber(), Number.parseInt(recordsPerPageElement.value)))
-    });
+    tableHeader.addEventListener('click', () => handleTHClick(tableHeader.id));
   }
+
+  // Input listener for the search bar
   const searchElement = document.getElementById('search');
-  searchElement.addEventListener('input', () => { handleSearch(filteredCountriesList, searchElement, recordsPerPageElement.value) });
+  searchElement.addEventListener('input', () => {
+    searchedString = searchElement.value.toLowerCase();
+    handleSearch();
+  });
+
+  // Change listener for the dropdown of records per page 
   const recordsPerPageElement = document.getElementById("nums");
   recordsPerPageElement.addEventListener('change', () => {
-    handleRecordsNum(recordsPerPageElement,
-      searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()))
+    recordPerPage = Number.parseInt(recordsPerPageElement.value);
+    handleRecordsNum();
   });
+
+  // Click listener for the pagination arrows
   const pageArrowsElements = document.getElementsByClassName("page_numbers_arrow");
   const pageNumbersElements = document.getElementsByClassName("page_numbers");
   for (const pageArrowElement of pageArrowsElements) {
     pageArrowElement.addEventListener('click', () => {
-      handleArrowsClick(searchData(filteredCountriesList, searchElement.value.toLocaleLowerCase()), pageArrowElement.id, pageNumbersElements, recordsPerPageElement.value);
+      handleArrowsClick(updatedCountriesList, pageArrowElement.id, recordPerPage);
     });
   }
-  handleRecordsNum(recordsPerPageElement, filteredCountriesList);
+  reset();
 }
-export { fetchCountriesList, renderCountriesList, runListeners, searchData, paginateData };
+export { fetchCountriesList, renderCountriesList, runListeners, searchCountriesList, paginateCountriesList, sortCountriesList, reset };
