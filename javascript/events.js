@@ -1,6 +1,6 @@
 import { searchCountriesList, paginateCountriesList, sortCountriesList, reset } from "./countriesTable.js";
 let tableHeaderCounter = 0;
-let savedTableHeaderName ;
+let savedTableHeaderName;
 const TableHeaders = document.getElementsByClassName("table_header");
 let pageNumberLocationPointer = 1;
 let pageNumberLastValuePointer = 5;
@@ -9,7 +9,7 @@ let pageNumberValuePointer = 1
 const pageNumbers = document.getElementsByClassName("page_numbers");
 
 // Sorting
-export function handleTHClick(tableHeaderName) {
+function handleTHClick(tableHeaderName) {
     if (tableHeaderName === savedTableHeaderName) {
         tableHeaderCounter++;
     }
@@ -47,7 +47,7 @@ function displayArrow(arrowType, tableHeaderName) {
     }
 }
 // Searching
-export function handleSearch() {
+function handleSearch() {
     setTimeout(function () {
         displayArrow(savedTableHeaderName);
         reSetPagination();
@@ -58,12 +58,14 @@ export function handleSearch() {
 
 // Pagination
 // Records per page
-export function handleRecordsNum() {
+function handleRecordsNum() {
     displayArrow(savedTableHeaderName);
     reSetPagination();
     paginateCountriesList(1);
 }
-export async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPerPage) {
+
+// Navigate between pages
+async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPerPage) {
     let lastPageNumber = Math.ceil(filteredCountriesList.length / Number.parseInt(recordPerPage));
     const arrowDirectionValue = arrowDirection === "right" ? 1 : -1;
 
@@ -75,7 +77,7 @@ export async function handleArrowsClick(filteredCountriesList, arrowDirection, r
         changePageNumberValues(arrowDirectionValue, lastPageNumber)
     } else {
         pageNumberLocationPointer = modifyPointerValue(pageNumberLocationPointer, arrowDirection === "right");
-        displayLine(pageNumberLocationPointer, arrowDirectionValue);
+        displayLine(pageNumberLocationPointer);
     }
 
     paginateCountriesList(pageNumberValuePointer);
@@ -92,21 +94,27 @@ function modifyPointerValue(targetPointer, condition, MaxValue = 5) {
 }
 
 function displayLine(pageNumberID, arrowDirection) {// arrow direction= 1:right / -1:left
-    if (pageNumberID > 1 || arrowDirection == -1) {
-        document.getElementById(pageNumberID - (1 * arrowDirection)).style.textDecoration = "none";
+
+    for (let i = 0; i < 5; i++) {
+        pageNumbers[i].style.textDecoration = "none";
     }
+
     document.getElementById(pageNumberID).style.textDecoration = "underline";
 }
-function changePageNumberValues(arrowDirection, lastPageNumber) {
+function changePageNumberValues(arrowDirection, lastPageNumber, incrementValue = 1) {
     if (arrowDirection == 1 && pageNumberLastValuePointer < lastPageNumber) {
-        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) + 1);
-        pageNumberLastValuePointer++;
-        pageNumberFirstValuePointer++;
+        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) + incrementValue);
+        if (incrementValue === 1) {
+            pageNumberLastValuePointer++;
+            pageNumberFirstValuePointer++;
+        }
     }
     else if (arrowDirection == -1 && pageNumberLastValuePointer <= lastPageNumber) {
-        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) - 1);
-        pageNumberLastValuePointer--;
-        pageNumberFirstValuePointer--;
+        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) - incrementValue);
+        if (incrementValue === 1) {
+            pageNumberLastValuePointer--;
+            pageNumberFirstValuePointer--;
+        }
     }
 }
 function reSetPagination() {
@@ -125,7 +133,25 @@ function reSetPagination() {
         pageNumbers[i].innerHTML = i + 1;
     }
 }
-export function handlePageNumberClick(filterCountriesList, elementID, recordPerPage) {
-    let pageNumber=Number.parseInt(document.getElementById(elementID).innerHTML);
-    pageNumberLocationPointer,pageNumberValuePointer=pageNumber;
+function handlePageNumberClick(updatedCountriesList, elementID, recordPerPage) {
+    let lastPageNumber = Math.ceil(updatedCountriesList.length / Number.parseInt(recordPerPage));
+    let pageNumberValuePointer = Number.parseInt(document.getElementById(elementID).innerHTML);
+    let arrowDirectionValue = elementID > pageNumberLocationPointer ? 1 : -1;
+
+    if ((Number.parseInt(elementID) <= 2 && pageNumberFirstValuePointer === 1) || pageNumberValuePointer >= lastPageNumber - 1) {
+        pageNumberLocationPointer = Number.parseInt(elementID);
+    } else {
+        pageNumberLocationPointer = 3;
+    }
+
+    if (pageNumberLocationPointer === 3 && ((pageNumberLastValuePointer < lastPageNumber && arrowDirectionValue == 1) || (pageNumberFirstValuePointer > 1 && arrowDirectionValue == -1))) {
+        changePageNumberValues(arrowDirectionValue, lastPageNumber, Math.abs(elementID - 3));
+    }
+    displayLine(pageNumberLocationPointer);
+
+    pageNumberLastValuePointer = pageNumberValuePointer + (5 - pageNumberLocationPointer);
+    pageNumberFirstValuePointer = pageNumberValuePointer - (pageNumberLocationPointer - 1);
+
+    paginateCountriesList(pageNumberValuePointer);
 }
+export { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick }

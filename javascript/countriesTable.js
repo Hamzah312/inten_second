@@ -1,5 +1,5 @@
 
-import { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, getPageNumber } from "./events.js";
+import { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick } from "./events.js";
 let filteredCountriesList;
 let updatedCountriesList;
 let recordPerPage = 10;
@@ -98,6 +98,14 @@ function runListeners() {
       handleArrowsClick(updatedCountriesList, pageArrowElement.id, recordPerPage);
     });
   }
-  handleRecordsNum(recordsPerPageElement, filteredCountriesList);
+
+  //// Click listener for the page numbers
+  const pageNumbersElements = document.getElementsByClassName("page_numbers")
+  for (const pageNumberElement of pageNumbersElements) {
+    pageNumberElement.addEventListener('click', () => {
+      handlePageNumberClick(updatedCountriesList, pageNumberElement.id, recordPerPage);
+    });
+  }
+  reset();
 }
 export { fetchCountriesList, renderCountriesList, runListeners, searchCountriesList, paginateCountriesList, sortCountriesList, reset };
