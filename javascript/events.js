@@ -69,8 +69,6 @@ async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPe
     let lastPageNumber = Math.ceil(filteredCountriesList.length / Number.parseInt(recordPerPage));
     const arrowDirectionValue = arrowDirection === "right" ? 1 : -1;
 
-    displayArrow(savedTableHeaderName);
-
     pageNumberValuePointer = modifyPointerValue(pageNumberValuePointer, arrowDirection === "right", pageNumberLastValuePointer);
 
     if (pageNumberLocationPointer === 3 && ((pageNumberLastValuePointer < lastPageNumber && arrowDirectionValue == 1) || (pageNumberFirstValuePointer > 1 && arrowDirectionValue == -1))) {
@@ -79,7 +77,10 @@ async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPe
         pageNumberLocationPointer = modifyPointerValue(pageNumberLocationPointer, arrowDirection === "right");
         displayLine(pageNumberLocationPointer);
     }
-
+    console.log(pageNumberLocationPointer);
+    console.log(pageNumberValuePointer);
+    console.log(pageNumberFirstValuePointer);
+    console.log(pageNumberLastValuePointer);
     paginateCountriesList(pageNumberValuePointer);
 }
 
@@ -135,7 +136,7 @@ function reSetPagination() {
 }
 function handlePageNumberClick(updatedCountriesList, elementID, recordPerPage) {
     let lastPageNumber = Math.ceil(updatedCountriesList.length / Number.parseInt(recordPerPage));
-    let pageNumberValuePointer = Number.parseInt(document.getElementById(elementID).innerHTML);
+    pageNumberValuePointer = Number.parseInt(document.getElementById(elementID).innerHTML);
     let arrowDirectionValue = elementID > pageNumberLocationPointer ? 1 : -1;
 
     if ((Number.parseInt(elementID) <= 2 && pageNumberFirstValuePointer === 1) || pageNumberValuePointer >= lastPageNumber - 1) {
@@ -151,7 +152,10 @@ function handlePageNumberClick(updatedCountriesList, elementID, recordPerPage) {
 
     pageNumberLastValuePointer = pageNumberValuePointer + (5 - pageNumberLocationPointer);
     pageNumberFirstValuePointer = pageNumberValuePointer - (pageNumberLocationPointer - 1);
-
+    console.log(pageNumberLocationPointer);
+    console.log(pageNumberValuePointer);
+    console.log(pageNumberFirstValuePointer);
+    console.log(pageNumberLastValuePointer);
     paginateCountriesList(pageNumberValuePointer);
 }
 export { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick }
