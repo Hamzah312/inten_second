@@ -77,10 +77,6 @@ async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPe
         pageNumberLocationPointer = modifyPointerValue(pageNumberLocationPointer, arrowDirection === "right");
         displayLine(pageNumberLocationPointer);
     }
-    console.log(pageNumberLocationPointer);
-    console.log(pageNumberValuePointer);
-    console.log(pageNumberFirstValuePointer);
-    console.log(pageNumberLastValuePointer);
     paginateCountriesList(pageNumberValuePointer);
 }
 
@@ -152,10 +148,6 @@ function handlePageNumberClick(updatedCountriesList, elementID, recordPerPage) {
 
     pageNumberLastValuePointer = pageNumberValuePointer + (5 - pageNumberLocationPointer);
     pageNumberFirstValuePointer = pageNumberValuePointer - (pageNumberLocationPointer - 1);
-    console.log(pageNumberLocationPointer);
-    console.log(pageNumberValuePointer);
-    console.log(pageNumberFirstValuePointer);
-    console.log(pageNumberLastValuePointer);
     paginateCountriesList(pageNumberValuePointer);
 }
 export { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick }
