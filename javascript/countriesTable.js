@@ -1,5 +1,5 @@
 
-import { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick } from "./events.js";
+import { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, getPageNumber } from "./events.js";
 let filteredCountriesList;
 let updatedCountriesList;
 let recordPerPage = 10;
@@ -93,12 +93,11 @@ function runListeners() {
 
   // Click listener for the pagination arrows
   const pageArrowsElements = document.getElementsByClassName("page_numbers_arrow");
-  const pageNumbersElements = document.getElementsByClassName("page_numbers");
   for (const pageArrowElement of pageArrowsElements) {
     pageArrowElement.addEventListener('click', () => {
       handleArrowsClick(updatedCountriesList, pageArrowElement.id, recordPerPage);
     });
   }
-  reset();
+  handleRecordsNum(recordsPerPageElement, filteredCountriesList);
 }
 export { fetchCountriesList, renderCountriesList, runListeners, searchCountriesList, paginateCountriesList, sortCountriesList, reset };

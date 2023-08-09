@@ -63,7 +63,6 @@ export function handleRecordsNum() {
     reSetPagination();
     paginateCountriesList(1);
 }
-// Navigate pages
 export async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPerPage) {
     let lastPageNumber = Math.ceil(filteredCountriesList.length / Number.parseInt(recordPerPage));
     const arrowDirectionValue = arrowDirection === "right" ? 1 : -1;
@@ -125,4 +124,8 @@ function reSetPagination() {
         }
         pageNumbers[i].innerHTML = i + 1;
     }
+}
+export function handlePageNumberClick(filterCountriesList, elementID, recordPerPage) {
+    let pageNumber=Number.parseInt(document.getElementById(elementID).innerHTML);
+    pageNumberLocationPointer,pageNumberValuePointer=pageNumber;
 }
