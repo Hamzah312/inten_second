@@ -38,8 +38,20 @@ tr:nth-child(even) {
     background-color: rgb(128, 127, 127);
 }
 
+.footer{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
 .center {
     text-align: center;
+}
+
+.search_bar{
+    display: flex;
+    justify-content: center;
+    margin: 8px;
 }
 
 .pagination {
