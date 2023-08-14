@@ -203,10 +203,9 @@ function handleBordersButtonClick(bordersButton, bordersBox, countriesList, stor
         clickedBordersCountriesList = reduceCountriesList(storedCountriesBordersList, clickedRecordBorders);
     }
 
-    renderModalBoxTable(clickedBordersCountriesList,clickedRecordBorders,clickedRecord.name);
+    renderModalBoxTable(clickedBordersCountriesList, clickedRecordBorders, clickedRecord.name);
 }
-function renderModalBoxTable(borderCountriesList,condition,countryName)
-{
+function renderModalBoxTable(borderCountriesList, condition, countryName) {
     const countryBordersTitle = document.getElementById('modal_box_title');
     countryBordersTitle.innerHTML = ` ${countryName} Borders List`;
     const message = document.getElementById('message');
