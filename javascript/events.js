@@ -150,4 +150,93 @@ function handlePageNumberClick(updatedCountriesList, elementID, recordPerPage) {
     pageNumberFirstValuePointer = pageNumberValuePointer - (pageNumberLocationPointer - 1);
     paginateCountriesList(pageNumberValuePointer);
 }
-export { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick }
+
+// Local Storage Functionality
+function handleCheckboxClick(checkbox, filteredCountriesList, storedCountriesList, storedCountriesBordersList) {
+    let searchedName = checkbox.nextSibling.nextSibling.innerHTML;
+
+    const clickedRecord = filteredCountriesList.find((record) => record.name === searchedName)
+    const clickedRecordBorders = clickedRecord.borders;
+    const countriesBordersList = reduceCountriesList(filteredCountriesList, clickedRecordBorders)
+
+    if (checkbox.checked == true) {
+        storedCountriesList.push(clickedRecord);
+        for (const borderCountry of countriesBordersList) {
+            if (!(storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3))) {
+                storedCountriesBordersList.push(borderCountry);
+            }
+        }
+    }
+    else {
+        let countryIndex = storedCountriesList.findIndex(item => item.name == searchedName);
+        storedCountriesList.splice(countryIndex, 1);
+        for (const borderCountry of countriesBordersList) {
+            if ((storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3))) {
+                let index = storedCountriesBordersList.findIndex(item => item.cca3 == borderCountry.cca3);
+                storedCountriesBordersList.splice(index, 1);
+            }
+        }
+
+    }
+
+    storeInLocalStorage(storedCountriesList, storedCountriesBordersList);
+}
+
+function storeInLocalStorage(storedCountriesList, storedCountriesBordersList) {
+    const storedAsString = JSON.stringify(storedCountriesList);
+    localStorage.setItem("storedCountriesList", storedAsString);
+    const storedBordersAsString = JSON.stringify(storedCountriesBordersList);
+    localStorage.setItem("storedCountriesBordersList", storedBordersAsString);
+}
+// Show borders
+function handleBordersButtonClick(bordersButton, bordersBox, countriesList, storedCountriesBordersList, isOnline,) {
+    bordersBox.style.display = "block";
+
+    const clickedRecord = countriesList.find((record) => record.cca3 === bordersButton.id);
+    const clickedRecordBorders = clickedRecord.borders;
+    let clickedBordersCountriesList;
+
+    if (isOnline) {
+        clickedBordersCountriesList = reduceCountriesList(countriesList, clickedRecordBorders);
+    }
+    else {
+        clickedBordersCountriesList = reduceCountriesList(storedCountriesBordersList, clickedRecordBorders);
+    }
+
+    renderModalBoxTable(clickedBordersCountriesList,clickedRecordBorders,clickedRecord.name);
+}
+function renderModalBoxTable(borderCountriesList,condition,countryName)
+{
+    const countryBordersTitle = document.getElementById('modal_box_title');
+    countryBordersTitle.innerHTML = ` ${countryName} Borders List`;
+    const message = document.getElementById('message');
+    const tableBody = document.getElementById('borders_modal_box_table_body');
+
+    if (condition) {
+        tableBody.parentElement.style.display = "table";
+        message.innerHTML = "";
+        tableBody.innerHTML = "";
+        for (const borderCountry of borderCountriesList) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${borderCountry.name}</td>
+                <td>${borderCountry.cca3}</td>
+                <td>${borderCountry.region}</td>
+              `;
+            tableBody.appendChild(row);
+        }
+    }
+    else {
+        tableBody.parentElement.style.display = "none";
+        tableBody.innerHTML = "";
+        message.innerHTML = "";
+        message.innerHTML = "This country does not has any borders, or data do not support it";
+    }
+}
+function reduceCountriesList(list, cca3s) {
+    return list.filter(country => {
+        if (cca3s)
+            return cca3s.includes(country.cca3);
+    });
+}
+export { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick, handleCheckboxClick, handleBordersButtonClick }

@@ -1,56 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
     <script type="module" src="./javascript/main.js"></script>
-    <script type="module" src="./javascript/countriesTable.js"> </script>
     <title>Countries Table</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <h1 id="title">Countries list Table</h1>
     <div class="search_bar">
-        <label for="search">Filter</label>
-        <input type="text" id="search" name="search">
+      <label for="search">Filter</label>
+      <input type="text" id="search" name="search" />
     </div>
     <table id="data-table">
-        <thead>
-            <tr>
-                <th>Select</th>
-                <th id="name" class="table_header">Name <span></span></th>
-                <th id="cca3" class="table_header">A3C <span></span></th>
-                <th id="capital" class="table_header">Capital <span></span></th>
-                <th id="population" class="table_header">Population <span></span></th>
-                <th id="region" class="table_header">Region <span></span></th>
-                <th>Borders</th>
-            </tr>
-        </thead>
-        <tbody>
-
-        </tbody>
+      <thead>
+        <tr>
+          <th id="select">Select</th>
+          <th id="name" class="table_header">Name <span></span></th>
+          <th id="cca3" class="table_header">A3C <span></span></th>
+          <th id="capital" class="table_header">Capital <span></span></th>
+          <th id="population" class="table_header">Population <span></span></th>
+          <th id="region" class="table_header">Region <span></span></th>
+          <th>Borders</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
     <div class="footer">
-        <div class="pagination">
-            <a id="left" class="page_numbers_arrow">&laquo;</a>
-            <a id="1" class="page_numbers">1</a>
-            <a id="2" class="page_numbers">2</a>
-            <a id="3" class="page_numbers">3</a>
-            <a id="4" class="page_numbers">4</a>
-            <a id="5" class="page_numbers">5</a>
-            <a id="right" class="page_numbers_arrow">&raquo;</a>
-        </div>
-        <div>
-            <label for="nums">Choose num of records per page:</label>
-            <select name="nums" id="nums">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-            </select>
-        </div>
+      <div class="pagination">
+        <a id="left" class="page_numbers_arrow">&laquo;</a>
+        <a id="1" class="page_numbers">1</a>
+        <a id="2" class="page_numbers">2</a>
+        <a id="3" class="page_numbers">3</a>
+        <a id="4" class="page_numbers">4</a>
+        <a id="5" class="page_numbers">5</a>
+        <a id="right" class="page_numbers_arrow">&raquo;</a>
+      </div>
+      <div>
+        <label for="nums">Choose num of records per page:</label>
+        <select name="nums" id="nums">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
     </div>
-</body>
-
+    <div id="borders_box" class="borders_modal_box">
+      <div id="borders_modal_box_content" class="borders_modal_box_content">
+        <span class="close">&times;</span>
+        <h2 id="modal_box_title"></h2>
+        <table id="borders_modal_box_table">
+          <thead>
+            <tr>
+              <th class="table_header">Name <span></span></th>
+              <th class="table_header">A3C <span></span></th>
+              <th class="table_header">Region <span></span></th>
+            </tr>
+          </thead>
+          <tbody id="borders_modal_box_table_body"></tbody>
+        </table>
+        <p id="message"></p>
+      </div>
+    </div>
+  </body>
 </html>
