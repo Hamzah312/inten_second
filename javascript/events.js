@@ -71,12 +71,15 @@ async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPe
 
     pageNumberValuePointer = modifyPointerValue(pageNumberValuePointer, arrowDirection === "right", pageNumberLastValuePointer);
 
-    if (pageNumberLocationPointer === 3 && ((pageNumberLastValuePointer < lastPageNumber && arrowDirectionValue == 1) || (pageNumberFirstValuePointer > 1 && arrowDirectionValue == -1))) {
+    if ((pageNumberLocationPointer === 3) && checkFirstLastPointerValues(lastPageNumber, arrowDirectionValue)) {
         changePageNumberValues(arrowDirectionValue, lastPageNumber)
     } else {
         pageNumberLocationPointer = modifyPointerValue(pageNumberLocationPointer, arrowDirection === "right");
         displayLine(pageNumberLocationPointer);
     }
+
+    pageNumberFirstValuePointer = Math.max(1, pageNumberValuePointer - 2);
+    pageNumberLastValuePointer = Math.min(lastPageNumber, pageNumberFirstValuePointer + 4);
     paginateCountriesList(pageNumberValuePointer);
 }
 
@@ -90,28 +93,16 @@ function modifyPointerValue(targetPointer, condition, MaxValue = 5) {
     return targetPointer;
 }
 
-function displayLine(pageNumberID, arrowDirection) {// arrow direction= 1:right / -1:left
-
-    for (let i = 0; i < 5; i++) {
-        pageNumbers[i].style.textDecoration = "none";
+function displayLine(pageNumberID) {
+    for (let pageNumber = 0; pageNumber < 5; pageNumber++) {
+        pageNumbers[pageNumber].style.textDecoration = "none";
     }
 
-    document.getElementById(pageNumberID).style.textDecoration = "underline";
+    pageNumbers[pageNumberID - 1].style.textDecoration = "underline";
 }
 function changePageNumberValues(arrowDirection, lastPageNumber, incrementValue = 1) {
-    if (arrowDirection == 1 && pageNumberLastValuePointer < lastPageNumber) {
-        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) + incrementValue);
-        if (incrementValue === 1) {
-            pageNumberLastValuePointer++;
-            pageNumberFirstValuePointer++;
-        }
-    }
-    else if (arrowDirection == -1 && pageNumberLastValuePointer <= lastPageNumber) {
-        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) - incrementValue);
-        if (incrementValue === 1) {
-            pageNumberLastValuePointer--;
-            pageNumberFirstValuePointer--;
-        }
+    if (pageNumberFirstValuePointer > 1 || pageNumberLastValuePointer < lastPageNumber) {
+        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) + incrementValue * arrowDirection);
     }
 }
 function reSetPagination() {
@@ -134,54 +125,62 @@ function handlePageNumberClick(updatedCountriesList, elementID, recordPerPage) {
     let lastPageNumber = Math.ceil(updatedCountriesList.length / Number.parseInt(recordPerPage));
     pageNumberValuePointer = Number.parseInt(document.getElementById(elementID).innerHTML);
     let arrowDirectionValue = elementID > pageNumberLocationPointer ? 1 : -1;
+    pageNumberLocationPointer = 3;
 
     if ((Number.parseInt(elementID) <= 2 && pageNumberFirstValuePointer === 1) || pageNumberValuePointer >= lastPageNumber - 1) {
         pageNumberLocationPointer = Number.parseInt(elementID);
-    } else {
-        pageNumberLocationPointer = 3;
-    }
-
-    if (pageNumberLocationPointer === 3 && ((pageNumberLastValuePointer < lastPageNumber && arrowDirectionValue == 1) || (pageNumberFirstValuePointer > 1 && arrowDirectionValue == -1))) {
+    } else if (checkFirstLastPointerValues(lastPageNumber, arrowDirectionValue)) {
         changePageNumberValues(arrowDirectionValue, lastPageNumber, Math.abs(elementID - 3));
     }
     displayLine(pageNumberLocationPointer);
 
-    pageNumberLastValuePointer = pageNumberValuePointer + (5 - pageNumberLocationPointer);
-    pageNumberFirstValuePointer = pageNumberValuePointer - (pageNumberLocationPointer - 1);
+    pageNumberFirstValuePointer = Math.max(1, pageNumberValuePointer - 2);
+    pageNumberLastValuePointer = Math.min(lastPageNumber, pageNumberFirstValuePointer + 4);
     paginateCountriesList(pageNumberValuePointer);
 }
 
-// Local Storage Functionality
-function handleCheckboxClick(checkbox, filteredCountriesList, storedCountriesList, storedCountriesBordersList) {
-    let searchedName = checkbox.nextSibling.nextSibling.innerHTML;
-
-    const clickedRecord = filteredCountriesList.find((record) => record.name === searchedName)
-    const clickedRecordBorders = clickedRecord.borders;
-    const countriesBordersList = reduceCountriesList(filteredCountriesList, clickedRecordBorders)
-
-    if (checkbox.checked == true) {
-        storedCountriesList.push(clickedRecord);
-        for (const borderCountry of countriesBordersList) {
-            if (!(storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3))) {
-                storedCountriesBordersList.push(borderCountry);
-            }
-        }
-    }
-    else {
-        let countryIndex = storedCountriesList.findIndex(item => item.name == searchedName);
-        storedCountriesList.splice(countryIndex, 1);
-        for (const borderCountry of countriesBordersList) {
-            if ((storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3))) {
-                let index = storedCountriesBordersList.findIndex(item => item.cca3 == borderCountry.cca3);
-                storedCountriesBordersList.splice(index, 1);
-            }
-        }
-
-    }
-
-    storeInLocalStorage(storedCountriesList, storedCountriesBordersList);
+function checkFirstLastPointerValues(lastPageNumber, arrowDirectionValue) {
+    return (pageNumberLastValuePointer < lastPageNumber && arrowDirectionValue == 1) || (pageNumberFirstValuePointer > 1 && arrowDirectionValue == -1)
 }
 
+// Local Storage Functionality
+function handleCheckboxClick(checkbox, filteredCountriesList) {
+    let searchedName = checkbox.nextSibling.nextSibling.innerHTML;
+
+    let storedCountriesList = JSON.parse(localStorage.getItem("storedCountriesList"));
+    let storedCountriesBordersList = JSON.parse(localStorage.getItem("storedCountriesBordersList"));
+
+    const clickedRecord = filteredCountriesList.find((record) => record.name === searchedName);
+    let countryIndex = storedCountriesList.findIndex(item => item.name === searchedName);
+    const countriesBordersList = getBordersByCountry(filteredCountriesList, clickedRecord.borders);
+    
+    clickedRecord.checkbox = `<input type="checkbox" class="checkbox" ${checkbox.checked ? "checked" : ""}></input>`;
+    
+    checkbox.checked ? storedCountriesList.push(clickedRecord) : storedCountriesList.splice(countryIndex, 1);
+
+    matchBorderCountries(checkbox.checked, countriesBordersList, storedCountriesBordersList);
+    storeInLocalStorage(storedCountriesList, storedCountriesBordersList);
+}
+function matchBorderCountries(isChecked, countriesBordersList, storedCountriesBordersList) {
+
+    for (const borderCountry of countriesBordersList) {
+        const condition = isChecked ? !(storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3)) : (storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3));
+        if (condition) {
+            if (isChecked) {
+                saveBorder(storedCountriesBordersList, borderCountry);
+            } else {
+                deleteBorder(storedCountriesBordersList, borderCountry);
+            }
+        }
+    }
+}
+function saveBorder(storedCountriesBordersList, borderCountry) {
+    storedCountriesBordersList.push(borderCountry);
+}
+function deleteBorder(storedCountriesBordersList, borderCountry) {
+    let index = storedCountriesBordersList.findIndex(item => item.cca3 === borderCountry.cca3);
+    storedCountriesBordersList.splice(index, 1);
+}
 function storeInLocalStorage(storedCountriesList, storedCountriesBordersList) {
     const storedAsString = JSON.stringify(storedCountriesList);
     localStorage.setItem("storedCountriesList", storedAsString);
@@ -189,18 +188,18 @@ function storeInLocalStorage(storedCountriesList, storedCountriesBordersList) {
     localStorage.setItem("storedCountriesBordersList", storedBordersAsString);
 }
 // Show borders
-function handleBordersButtonClick(bordersButton, bordersBox, countriesList, storedCountriesBordersList, isOnline,) {
+function handleBordersButtonClick(bordersButton, bordersBox, countriesList, isOnline,) {
     bordersBox.style.display = "block";
 
     const clickedRecord = countriesList.find((record) => record.cca3 === bordersButton.id);
     const clickedRecordBorders = clickedRecord.borders;
     let clickedBordersCountriesList;
-
+    const storedCountriesBordersList = JSON.parse(localStorage.getItem("storedCountriesBordersList"));
     if (isOnline) {
-        clickedBordersCountriesList = reduceCountriesList(countriesList, clickedRecordBorders);
+        clickedBordersCountriesList = getBordersByCountry(countriesList, clickedRecordBorders);
     }
     else {
-        clickedBordersCountriesList = reduceCountriesList(storedCountriesBordersList, clickedRecordBorders);
+        clickedBordersCountriesList = getBordersByCountry(storedCountriesBordersList, clickedRecordBorders);
     }
 
     renderModalBoxTable(clickedBordersCountriesList, clickedRecordBorders, clickedRecord.name);
@@ -232,10 +231,9 @@ function renderModalBoxTable(borderCountriesList, condition, countryName) {
         message.innerHTML = "This country does not has any borders, or data do not support it";
     }
 }
-function reduceCountriesList(list, cca3s) {
-    return list.filter(country => {
-        if (cca3s)
-            return cca3s.includes(country.cca3);
-    });
+function getBordersByCountry(list, cca3s) {
+    if (!cca3s)
+        return [];
+    return list.filter(country => cca3s.includes(country.cca3));
 }
 export { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick, handleCheckboxClick, handleBordersButtonClick }
