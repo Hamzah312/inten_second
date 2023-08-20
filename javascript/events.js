@@ -1,6 +1,6 @@
 import { searchCountriesList, paginateCountriesList, sortCountriesList, reset } from "./countriesTable.js";
 let tableHeaderCounter = 0;
-let savedTableHeaderName ;
+let savedTableHeaderName;
 const TableHeaders = document.getElementsByClassName("table_header");
 let pageNumberLocationPointer = 1;
 let pageNumberLastValuePointer = 5;
@@ -9,7 +9,7 @@ let pageNumberValuePointer = 1
 const pageNumbers = document.getElementsByClassName("page_numbers");
 
 // Sorting
-export function handleTHClick(tableHeaderName) {
+function handleTHClick(tableHeaderName) {
     if (tableHeaderName === savedTableHeaderName) {
         tableHeaderCounter++;
     }
@@ -47,7 +47,7 @@ function displayArrow(arrowType, tableHeaderName) {
     }
 }
 // Searching
-export function handleSearch() {
+function handleSearch() {
     setTimeout(function () {
         displayArrow(savedTableHeaderName);
         reSetPagination();
@@ -58,27 +58,28 @@ export function handleSearch() {
 
 // Pagination
 // Records per page
-export function handleRecordsNum() {
+function handleRecordsNum() {
     displayArrow(savedTableHeaderName);
     reSetPagination();
     paginateCountriesList(1);
 }
-// Navigate pages
-export async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPerPage) {
+
+// Navigate between pages
+async function handleArrowsClick(filteredCountriesList, arrowDirection, recordPerPage) {
     let lastPageNumber = Math.ceil(filteredCountriesList.length / Number.parseInt(recordPerPage));
     const arrowDirectionValue = arrowDirection === "right" ? 1 : -1;
 
-    displayArrow(savedTableHeaderName);
-
     pageNumberValuePointer = modifyPointerValue(pageNumberValuePointer, arrowDirection === "right", pageNumberLastValuePointer);
 
-    if (pageNumberLocationPointer === 3 && ((pageNumberLastValuePointer < lastPageNumber && arrowDirectionValue == 1) || (pageNumberFirstValuePointer > 1 && arrowDirectionValue == -1))) {
+    if ((pageNumberLocationPointer === 3) && checkFirstLastPointerValues(lastPageNumber, arrowDirectionValue)) {
         changePageNumberValues(arrowDirectionValue, lastPageNumber)
     } else {
         pageNumberLocationPointer = modifyPointerValue(pageNumberLocationPointer, arrowDirection === "right");
-        displayLine(pageNumberLocationPointer, arrowDirectionValue);
+        displayLine(pageNumberLocationPointer);
     }
 
+    pageNumberFirstValuePointer = Math.max(1, pageNumberValuePointer - 2);
+    pageNumberLastValuePointer = Math.min(lastPageNumber, pageNumberFirstValuePointer + 4);
     paginateCountriesList(pageNumberValuePointer);
 }
 
@@ -92,22 +93,16 @@ function modifyPointerValue(targetPointer, condition, MaxValue = 5) {
     return targetPointer;
 }
 
-function displayLine(pageNumberID, arrowDirection) {// arrow direction= 1:right / -1:left
-    if (pageNumberID > 1 || arrowDirection == -1) {
-        document.getElementById(pageNumberID - (1 * arrowDirection)).style.textDecoration = "none";
+function displayLine(pageNumberID) {
+    for (let pageNumber = 0; pageNumber < 5; pageNumber++) {
+        pageNumbers[pageNumber].style.textDecoration = "none";
     }
-    document.getElementById(pageNumberID).style.textDecoration = "underline";
+
+    pageNumbers[pageNumberID - 1].style.textDecoration = "underline";
 }
-function changePageNumberValues(arrowDirection, lastPageNumber) {
-    if (arrowDirection == 1 && pageNumberLastValuePointer < lastPageNumber) {
-        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) + 1);
-        pageNumberLastValuePointer++;
-        pageNumberFirstValuePointer++;
-    }
-    else if (arrowDirection == -1 && pageNumberLastValuePointer <= lastPageNumber) {
-        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) - 1);
-        pageNumberLastValuePointer--;
-        pageNumberFirstValuePointer--;
+function changePageNumberValues(arrowDirection, lastPageNumber, incrementValue = 1) {
+    if (pageNumberFirstValuePointer > 1 || pageNumberLastValuePointer < lastPageNumber) {
+        Array.from(pageNumbers).map(item => item.innerHTML = Number.parseInt(item.innerHTML) + incrementValue * arrowDirection);
     }
 }
 function reSetPagination() {
@@ -126,3 +121,119 @@ function reSetPagination() {
         pageNumbers[i].innerHTML = i + 1;
     }
 }
+function handlePageNumberClick(updatedCountriesList, elementID, recordPerPage) {
+    let lastPageNumber = Math.ceil(updatedCountriesList.length / Number.parseInt(recordPerPage));
+    pageNumberValuePointer = Number.parseInt(document.getElementById(elementID).innerHTML);
+    let arrowDirectionValue = elementID > pageNumberLocationPointer ? 1 : -1;
+    pageNumberLocationPointer = 3;
+
+    if ((Number.parseInt(elementID) <= 2 && pageNumberFirstValuePointer === 1) || pageNumberValuePointer >= lastPageNumber - 1) {
+        pageNumberLocationPointer = Number.parseInt(elementID);
+    } else if (checkFirstLastPointerValues(lastPageNumber, arrowDirectionValue)) {
+        changePageNumberValues(arrowDirectionValue, lastPageNumber, Math.abs(elementID - 3));
+    }
+    displayLine(pageNumberLocationPointer);
+
+    pageNumberFirstValuePointer = Math.max(1, pageNumberValuePointer - 2);
+    pageNumberLastValuePointer = Math.min(lastPageNumber, pageNumberFirstValuePointer + 4);
+    paginateCountriesList(pageNumberValuePointer);
+}
+
+function checkFirstLastPointerValues(lastPageNumber, arrowDirectionValue) {
+    return (pageNumberLastValuePointer < lastPageNumber && arrowDirectionValue == 1) || (pageNumberFirstValuePointer > 1 && arrowDirectionValue == -1)
+}
+
+// Local Storage Functionality
+function handleCheckboxClick(checkbox, filteredCountriesList) {
+    let searchedName = checkbox.nextSibling.nextSibling.innerHTML;
+
+    let storedCountriesList = JSON.parse(localStorage.getItem("storedCountriesList"));
+    let storedCountriesBordersList = JSON.parse(localStorage.getItem("storedCountriesBordersList"));
+
+    const clickedRecord = filteredCountriesList.find((record) => record.name === searchedName);
+    let countryIndex = storedCountriesList.findIndex(item => item.name === searchedName);
+    const countriesBordersList = getBordersByCountry(filteredCountriesList, clickedRecord.borders);
+    
+    clickedRecord.checkbox = `<input type="checkbox" class="checkbox" ${checkbox.checked ? "checked" : ""}></input>`;
+    
+    checkbox.checked ? storedCountriesList.push(clickedRecord) : storedCountriesList.splice(countryIndex, 1);
+
+    matchBorderCountries(checkbox.checked, countriesBordersList, storedCountriesBordersList);
+    storeInLocalStorage(storedCountriesList, storedCountriesBordersList);
+}
+function matchBorderCountries(isChecked, countriesBordersList, storedCountriesBordersList) {
+
+    for (const borderCountry of countriesBordersList) {
+        const condition = isChecked ? !(storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3)) : (storedCountriesBordersList.some(obj => obj.cca3 === borderCountry.cca3));
+        if (condition) {
+            if (isChecked) {
+                saveBorder(storedCountriesBordersList, borderCountry);
+            } else {
+                deleteBorder(storedCountriesBordersList, borderCountry);
+            }
+        }
+    }
+}
+function saveBorder(storedCountriesBordersList, borderCountry) {
+    storedCountriesBordersList.push(borderCountry);
+}
+function deleteBorder(storedCountriesBordersList, borderCountry) {
+    let index = storedCountriesBordersList.findIndex(item => item.cca3 === borderCountry.cca3);
+    storedCountriesBordersList.splice(index, 1);
+}
+function storeInLocalStorage(storedCountriesList, storedCountriesBordersList) {
+    const storedAsString = JSON.stringify(storedCountriesList);
+    localStorage.setItem("storedCountriesList", storedAsString);
+    const storedBordersAsString = JSON.stringify(storedCountriesBordersList);
+    localStorage.setItem("storedCountriesBordersList", storedBordersAsString);
+}
+// Show borders
+function handleBordersButtonClick(bordersButton, bordersBox, countriesList, isOnline,) {
+    bordersBox.style.display = "block";
+
+    const clickedRecord = countriesList.find((record) => record.cca3 === bordersButton.id);
+    const clickedRecordBorders = clickedRecord.borders;
+    let clickedBordersCountriesList;
+    const storedCountriesBordersList = JSON.parse(localStorage.getItem("storedCountriesBordersList"));
+    if (isOnline) {
+        clickedBordersCountriesList = getBordersByCountry(countriesList, clickedRecordBorders);
+    }
+    else {
+        clickedBordersCountriesList = getBordersByCountry(storedCountriesBordersList, clickedRecordBorders);
+    }
+
+    renderModalBoxTable(clickedBordersCountriesList, clickedRecordBorders, clickedRecord.name);
+}
+function renderModalBoxTable(borderCountriesList, condition, countryName) {
+    const countryBordersTitle = document.getElementById('modal_box_title');
+    countryBordersTitle.innerHTML = ` ${countryName} Borders List`;
+    const message = document.getElementById('message');
+    const tableBody = document.getElementById('borders_modal_box_table_body');
+
+    if (condition) {
+        tableBody.parentElement.style.display = "table";
+        message.innerHTML = "";
+        tableBody.innerHTML = "";
+        for (const borderCountry of borderCountriesList) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${borderCountry.name}</td>
+                <td>${borderCountry.cca3}</td>
+                <td>${borderCountry.region}</td>
+              `;
+            tableBody.appendChild(row);
+        }
+    }
+    else {
+        tableBody.parentElement.style.display = "none";
+        tableBody.innerHTML = "";
+        message.innerHTML = "";
+        message.innerHTML = "This country does not has any borders, or data do not support it";
+    }
+}
+function getBordersByCountry(list, cca3s) {
+    if (!cca3s)
+        return [];
+    return list.filter(country => cca3s.includes(country.cca3));
+}
+export { handleTHClick, handleSearch, handleRecordsNum, handleArrowsClick, handlePageNumberClick, handleCheckboxClick, handleBordersButtonClick }
